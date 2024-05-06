@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -51,6 +52,14 @@ public class Order {
 
     @Column(name = "user_id")
     private Long userId;
+
+    @OneToMany(mappedBy = "Order")
+    private Set<Customer> customers;
+
+
+    @OneToMany(mappedBy = "Order")
+    private Set<LineItem> lineItems;
+
 
     public Order(Long id, Long checkoutId, String contactEmail, Date createdAt, String shopMoneyAmount, String shopMoneyCurrencyCode, String presenmentMoneyAmount, String presenmentMoneyCurrencyCode, String currentTotalTax, String name, String phoneNumber, String totalPrice, Long userId) {
         this.id = id;
