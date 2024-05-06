@@ -1,7 +1,9 @@
 package com.Saiddev.ShopifyOrderTracking.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
@@ -11,6 +13,8 @@ import java.util.Set;
 @Getter
 @Setter
 @Table(name = "Order")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,26 +63,4 @@ public class Order {
 
     @OneToMany(mappedBy = "Order")
     private Set<LineItem> lineItems;
-
-
-    public Order(Long id, Long checkoutId, String contactEmail, Date createdAt, String shopMoneyAmount, String shopMoneyCurrencyCode, String presenmentMoneyAmount, String presenmentMoneyCurrencyCode, String currentTotalTax, String name, String phoneNumber, String totalPrice, Long userId) {
-        this.id = id;
-        this.checkoutId = checkoutId;
-        this.contactEmail = contactEmail;
-        this.createdAt = createdAt;
-        this.shopMoneyAmount = shopMoneyAmount;
-        this.shopMoneyCurrencyCode = shopMoneyCurrencyCode;
-        this.presenmentMoneyAmount = presenmentMoneyAmount;
-        this.presenmentMoneyCurrencyCode = presenmentMoneyCurrencyCode;
-        this.currentTotalTax = currentTotalTax;
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.totalPrice = totalPrice;
-        this.userId = userId;
-    }
-
-
-    public Order() {
-    }
-
 }
