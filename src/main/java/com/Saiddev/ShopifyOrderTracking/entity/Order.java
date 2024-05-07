@@ -25,14 +25,11 @@ public class Order {
     @Column(name = "contact_email")
     private String contactEmail;
 
-    @Column(name = "created_at")
-    private Date createdAt;
+    @Column(name = "order_created_at")
+    private Date orderCreatedAt;
 
-    @Column(name = "name")
-    private String name;
-
-    @Column(name = "phone_number")
-    private String phoneNumber;
+    @Column(name = "order_name")
+    private String orderName;
 
     @Column(name = "tax")
     private Double tax;

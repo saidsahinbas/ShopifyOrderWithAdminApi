@@ -22,32 +22,23 @@ public class LineItem {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "current_quantity")
-    private Integer currentQuantity;
-
-    @Column(name = "fulfilable_quantity")
-    private Integer fulfilableQuantity;
+    @Column(name = "quantity")
+    private Integer quantity;
 
     @Column(name = "grams")
     private Double grams;
 
-    @Column(name = "gift_card")
-    private Boolean giftCard;
+    @Column(name = "is_gift_card")
+    private Boolean isGiftCard;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "product_name")
+    private String productName;
 
     @Column(name = "price")
     private Double price;
 
-    @Column(name = "product_exist")
-    private Boolean productExist;
-
     @Column(name = "product_id")
     private Long productId;
-
-    @Column(name = "variant_id")
-    private Long variantId;
 
     @ManyToOne
     @JoinColumn(name="order_id")

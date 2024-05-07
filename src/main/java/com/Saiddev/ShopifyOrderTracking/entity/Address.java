@@ -21,38 +21,17 @@ public class Address {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "first_name")
-    private String firstName;
-
-    @Column(name = "last_name")
-    private String lastName;
-
-    @Column(name = "company")
-    private String company;
-
-    @Column(name = "address1")
-    private String address1;
-
-    @Column(name = "address2")
-    private String address2;
+    @Column(name = "address")
+    private String address;
 
     @Column(name = "city")
     private String city;
-
-    @Column(name = "province")
-    private String province;
 
     @Column(name = "country")
     private String country;
 
     @Column(name="zip")
     private String zip;
-
-    @Column(name = "phone")
-    private String phone;
-
-    @Column(name = "name")
-    private String name;
 
     @Column(name = "country_code")
     private String countryCode;
@@ -63,6 +42,5 @@ public class Address {
     @ManyToOne
     @JoinColumn(name="customer_id")
     private Customer customer;
-
 
 }

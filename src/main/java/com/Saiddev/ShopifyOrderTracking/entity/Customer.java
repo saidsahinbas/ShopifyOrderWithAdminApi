@@ -39,9 +39,6 @@ public class Customer {
     @Column(name = "order_count")
     private Integer orderCount;
 
-    @Column(name = "state")
-    private String state;
-
     @Column(name = "total_spent")
     private Double totalSpent;
 
