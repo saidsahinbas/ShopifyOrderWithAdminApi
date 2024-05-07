@@ -7,12 +7,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "Order")
+@Table(name = "order1")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Order {
@@ -21,29 +22,11 @@ public class Order {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "checkout_id")
-    private Long checkoutId;
-
     @Column(name = "contact_email")
     private String contactEmail;
 
     @Column(name = "created_at")
     private Date createdAt;
-
-    @Column(name = "shop_money_amount")
-    private String shopMoneyAmount;
-
-    @Column(name = "shop_money_currency_code")
-    private String shopMoneyCurrencyCode;
-
-    @Column(name = "presenment_money_amount")
-    private String presenmentMoneyAmount;
-
-    @Column(name = "presenment_money_currency_code")
-    private String presenmentMoneyCurrencyCode;
-
-    @Column(name = "current_total_tax")
-    private String currentTotalTax;
 
     @Column(name = "name")
     private String name;
@@ -51,16 +34,19 @@ public class Order {
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    @Column(name = "tax")
+    private Double tax;
+
     @Column(name = "total_price")
-    private String totalPrice;
+    private Double totalPrice;
 
-    @Column(name = "user_id")
-    private Long userId;
-
-    @OneToMany(mappedBy = "Order")
-    private Set<Customer> customers;
-
-
-    @OneToMany(mappedBy = "Order")
+    //tdo
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "order")
     private Set<LineItem> lineItems;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
+
 }

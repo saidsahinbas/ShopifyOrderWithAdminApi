@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.Set;
 
 @Entity
-@Table(name = "Customer")
+@Table(name = "customer")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -36,7 +36,7 @@ public class Customer {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "order-count")
+    @Column(name = "order_count")
     private Integer orderCount;
 
     @Column(name = "state")
@@ -45,27 +45,16 @@ public class Customer {
     @Column(name = "total_spent")
     private Double totalSpent;
 
-    @Column(name = "last_order_id")
-    private Long lastOrderId;
-
-    @Column(name = "last_order_name")
-    private String lastOrderName;
-
     @Column(name = "currency")
     private String currency;
 
     @Column(name = "phone")
     private String phone;
 
-    // TODO: Address fk to Customer
-    // Many to one
-    @OneToMany(mappedBy = "Customer")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
     private Set<Address> addresses;
 
-    // Order fk to Customer
-    @ManyToOne
-    @JoinColumn(name="order_id", nullable=false)
-    private Order order;
-
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
+    private Set<Order> orders;
 
 }

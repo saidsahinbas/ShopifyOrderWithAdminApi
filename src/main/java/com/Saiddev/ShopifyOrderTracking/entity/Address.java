@@ -10,7 +10,7 @@ import lombok.Setter;
 import java.util.Date;
 
 @Entity
-@Table(name = "Address")
+@Table(name = "address")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,10 +20,6 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name="customer_id", nullable=false)
-    private Customer customer;
 
     @Column(name = "first_name")
     private String firstName;
@@ -63,5 +59,10 @@ public class Address {
 
     @Column(name = "is_default_address")
     private Boolean isDefaultAddress;
+
+    @ManyToOne
+    @JoinColumn(name="customer_id")
+    private Customer customer;
+
 
 }

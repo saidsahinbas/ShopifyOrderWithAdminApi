@@ -50,6 +50,6 @@ public class LineItem {
     private Long variantId;
 
     @ManyToOne
-    @JoinColumn(name="order_id", nullable=false)
+    @JoinColumn(name="order_id")
     private Order order;
 }
