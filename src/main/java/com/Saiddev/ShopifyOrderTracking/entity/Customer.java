@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -17,7 +18,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class Customer {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
@@ -49,9 +49,9 @@ public class Customer {
     private String phone;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
-    private Set<Address> addresses;
+    private Set<Address> addresses = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
-    private Set<Order> orders;
+    private Set<Order> orders = new HashSet<>();
 
 }

@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 public class LineItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
@@ -41,6 +40,6 @@ public class LineItem {
     private Long productId;
 
     @ManyToOne
-    @JoinColumn(name="order_id")
+    @JoinColumn(name="order_id", referencedColumnName = "id")
     private Order order;
 }

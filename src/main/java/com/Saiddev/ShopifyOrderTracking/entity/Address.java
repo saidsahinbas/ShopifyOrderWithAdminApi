@@ -17,7 +17,6 @@ import java.util.Date;
 @AllArgsConstructor
 public class Address {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
@@ -40,7 +39,7 @@ public class Address {
     private Boolean isDefaultAddress;
 
     @ManyToOne
-    @JoinColumn(name="customer_id")
+    @JoinColumn(name="customer_id", referencedColumnName = "id")
     private Customer customer;
 
 }

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -18,7 +19,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class Order {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
@@ -37,12 +37,18 @@ public class Order {
     @Column(name = "total_price")
     private Double totalPrice;
 
-    //tdo
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "order")
-    private Set<LineItem> lineItems;
+    @Column(name = "fulfillment_status")
+    private String fulfilmentStatus;
+
+    @Column(name = "payment_status")
+    private String paymentStatus;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
+    private Set<LineItem> lineItems = new HashSet<>();
+
 
     @ManyToOne
-    @JoinColumn(name = "customer_id")
+    @JoinColumn(name = "customer_id", referencedColumnName = "id")
     private Customer customer;
 
 
