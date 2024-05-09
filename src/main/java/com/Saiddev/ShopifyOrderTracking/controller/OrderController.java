@@ -1,6 +1,8 @@
 package com.Saiddev.ShopifyOrderTracking.controller;
 
+import com.Saiddev.ShopifyOrderTracking.entity.Customer;
 import com.Saiddev.ShopifyOrderTracking.entity.Order;
+import com.Saiddev.ShopifyOrderTracking.service.CustomerService;
 import com.Saiddev.ShopifyOrderTracking.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +18,11 @@ import java.util.List;
 public class OrderController {
 
     private OrderService orderService;
-    public OrderController(OrderService orderService){
+    private CustomerService customerService;
+
+    public OrderController(OrderService orderService, CustomerService customerService){
         this.orderService = orderService;
+        this.customerService = customerService;
     }
 
 
@@ -25,6 +30,11 @@ public class OrderController {
     public List<Order> getAllOrder() {
         return orderService.getAllOrders();
 
+    }
+
+    @GetMapping("/all-customer")
+    public List<Customer> getAllCustomer(){
+        return customerService.getAllCustomer();
     }
 
     /*

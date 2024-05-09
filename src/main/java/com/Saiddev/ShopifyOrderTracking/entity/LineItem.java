@@ -1,5 +1,7 @@
 package com.Saiddev.ShopifyOrderTracking.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -41,5 +43,6 @@ public class LineItem {
 
     @ManyToOne
     @JoinColumn(name="order_id", referencedColumnName = "id")
+    @JsonIgnore
     private Order order;
 }
