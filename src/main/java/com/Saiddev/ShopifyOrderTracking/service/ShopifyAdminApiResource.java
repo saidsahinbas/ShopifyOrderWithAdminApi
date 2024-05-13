@@ -16,6 +16,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Date;
 
 @Component
 public class ShopifyAdminApiResource {
@@ -42,16 +43,11 @@ public class ShopifyAdminApiResource {
     }
 
 
-    @Scheduled(fixedRate = 10000000)
+    @Scheduled(fixedRate = 1000000, initialDelay = 900000000)
     public void fetchOrders() throws IOException, InterruptedException {
-        Order order = new Order();
-        LineItem lineItem = new LineItem();
-        Customer customer = new Customer();
-        Address address = new Address();
-
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://mp-integrator-test-2.myshopify.com/admin/api/2024-04/orders.json"))
+                .uri(URI.create("https://mp-integrator-test-2.myshopify.com/admin/api/2024-04/orders.json?status=any"))
                 .header("X-Shopify-Access-Token", "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")
                 .build();
 
@@ -59,57 +55,84 @@ public class ShopifyAdminApiResource {
         OrderListDto orderListDto = gson.fromJson(response.body(), OrderListDto.class);
 
         for (OrderDto orderDto : orderListDto.getOrderDtos()) {
-            order.setId(orderDto.getId());
-            order.setContactEmail(orderDto.getContactEmail());
-            order.setOrderCreatedAt(orderDto.getCreatedAt());
+            Order order = new Order();
+            //System.out.println(orderDto);
+
+            order.setOrderIdOnApi(orderDto.getId());
             order.setOrderName(orderDto.getName());
+            order.setContactEmail(orderDto.getContactEmail());
+            order.setCreatedAt(orderDto.getCreatedAt());
             order.setTax(orderDto.getCurrentTotalTax());
             order.setTotalPrice(orderDto.getTotalPrice());
-            order.setFulfilmentStatus(orderDto.getFulfilment() == null ? "unfulfilled" : orderDto.getFulfilment() );
+            order.setFulfilmentStatus(orderDto.getFulfilment() == null ? "unfulfilled" : orderDto.getFulfilment());
             order.setPaymentStatus(orderDto.getFinancialStatus());
-            lineItem.setOrder(order);
 
-            for (LineItemDto lineItemDto : orderDto.getLineItemDto()) {
-                lineItem.setId(lineItemDto.getId());
-                lineItem.setQuantity(lineItemDto.getCurrentQuantity());
+            //LineItemListDto lineItemListDto = orderDto.getLineItemListDto();
+            LineItem lineItem = new LineItem();
+
+            lineItem.setOrder(order);
+            for (LineItemDto lineItemDto : orderDto.getLine_items()) {
+
+                //System.out.println(lineItemDto);
+
+                lineItem.setLineItemIdOnApi(lineItemDto.getId());
                 lineItem.setGrams(lineItemDto.getGrams());
                 lineItem.setIsGiftCard(lineItemDto.getGift());
                 lineItem.setProductName(lineItemDto.getName());
                 lineItem.setPrice(lineItemDto.getPrice());
                 lineItem.setProductId(lineItemDto.getProductId());
+                lineItem.setQuantity(lineItemDto.getCurrentQuantity());
+
                 lineItemService.saveLineItem(lineItem);
             }
 
+            Customer customer = new Customer();
+            Customer bilinmeyenMusteri = new Customer(99L, 9999L, "bilimeyen@bilinmeyen", new Date(), new Date(), "bilinmeyen", "bilinmeyen", 0, 0.0, "TRY", "+900000000000");
+            Address address = new Address();
+            Address bilinmeyenAddress = new Address(99L, 11111111L, "Msinan mah", "corum", "Turkey", "19000", "TRY", false, customer);
+
             CustomerDto customerDto = orderDto.getCustomerDtos();
-            customer.setId(customerDto.getId());
-            customer.setEmail(customerDto.getEmail());
-            customer.setCreatedAt(customerDto.getCreatedAt());
-            customer.setUpdatedAt(customerDto.getUpdatedAt());
-            customer.setFirstName(customerDto.getFirstName());
-            customer.setLastName(customerDto.getLastName());
-            customer.setTotalSpent(customerDto.getTotalSpent());
-            customer.setCurrency(customerDto.getCurrency());
-            customer.setPhone(customerDto.getPhone());
 
-            order.setCustomer(customer);
-            address.setCustomer(customer);
+            if (customerDto == null) {
+                customer = bilinmeyenMusteri;
+                //customerService.saveCustomer(customer);
 
-            AddressDto addressDto = customerDto.getAddressDtos();
-            address.setId(addressDto.getId());
-            address.setAddress(addressDto.getAddress1() + " " +  addressDto.getAddress2());
-            address.setCity(addressDto.getCity());
-            address.setCountry(addressDto.getCountry());
-            address.setZip(addressDto.getZip());
-            address.setCountryCode(addressDto.getCountryCode());
-            address.setIsDefaultAddress(addressDto.getDefaultCustomerAddress());
+            } else {
+                AddressDto addressDto = customerDto.getAddressDtos();
+                if (addressDto == null) {
+                    address = bilinmeyenAddress;
+                    //addressService.saveAddress(address);
+                } else {
+                    address.setAddressIdOnApi(addressDto.getId());
+                    address.setAddress(addressDto.getAddress1() + " " + addressDto.getAddress2());
+                    address.setCity(addressDto.getCity());
+                    address.setCountry(addressDto.getCountry());
+                    address.setZip(addressDto.getZip());
+                    address.setCountryCode(addressDto.getCountryCode());
+                    address.setIsDefaultAddress(addressDto.getIsDefaultCustomerAddress());
+                    address.setCustomer(customer);
+                    //addressService.saveAddress(address);
+                }
+                customer.setCustomerIdOnApi(customerDto.getId());
+                customer.setEmail(customerDto.getEmail());
+                customer.setCreatedAt(customerDto.getCreatedAt());
+                customer.setUpdatedAt(customerDto.getUpdatedAt());
+                customer.setFirstName(customerDto.getFirstName());
+                customer.setLastName(customerDto.getLastName());
+                customer.setTotalSpent(customerDto.getTotalSpent());
+                customer.setCurrency(customerDto.getCurrency());
+                customer.setPhone(customerDto.getPhone());
+                //customerService.saveCustomer(customer);
+            }
+
 
             customerService.saveCustomer(customer);
             addressService.saveAddress(address);
+            order.setCustomer(customer);
             orderService.saveOrder(order);
 
-
         }
-
     }
 
 }
+

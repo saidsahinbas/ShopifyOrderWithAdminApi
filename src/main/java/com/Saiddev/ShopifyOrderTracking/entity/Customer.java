@@ -18,8 +18,12 @@ import java.util.Set;
 @AllArgsConstructor
 public class Customer {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
+    @Column(name = "customer_id_on_api")
+    private Long customerIdOnApi;
 
     @Column(name = "email")
     private String email;
@@ -47,11 +51,5 @@ public class Customer {
 
     @Column(name = "phone")
     private String phone;
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
-    private Set<Address> addresses = new HashSet<>();
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
-    private Set<Order> orders = new HashSet<>();
 
 }

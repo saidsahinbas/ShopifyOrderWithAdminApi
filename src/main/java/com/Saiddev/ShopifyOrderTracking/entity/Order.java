@@ -21,14 +21,18 @@ import java.util.Set;
 @AllArgsConstructor
 public class Order {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
+    @Column(name = "order_id_on_api")
+    private Long orderIdOnApi;
 
     @Column(name = "contact_email")
     private String contactEmail;
 
-    @Column(name = "order_created_at")
-    private Date orderCreatedAt;
+    @Column(name = "created_at")
+    private Date createdAt;
 
     @Column(name = "order_name")
     private String orderName;
@@ -45,14 +49,9 @@ public class Order {
     @Column(name = "payment_status")
     private String paymentStatus;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
-    private Set<LineItem> lineItems = new HashSet<>();
 
-
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     @JsonIgnore
     private Customer customer;
-
-
 }

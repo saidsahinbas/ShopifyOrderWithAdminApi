@@ -10,9 +10,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 @RepositoryRestResource(collectionResourceRel = "orders", path = "orders")
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByFulfilmentStatus(@Param("name") String name);
-}
+
+    List<Order> findByCreatedAtBetweenOrderByCreatedAtDesc(Date startDate, Date endDate);}

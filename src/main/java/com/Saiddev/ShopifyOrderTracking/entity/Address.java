@@ -19,8 +19,12 @@ import java.util.Date;
 @AllArgsConstructor
 public class Address {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
+    @Column(name = "address_id_on_api")
+    private Long addressIdOnApi;
 
     @Column(name = "address")
     private String address;

@@ -20,8 +20,12 @@ import java.math.BigDecimal;
 public class LineItem {
 
     @Id
+    @GeneratedValue(strategy =  GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
+    @Column(name = "line_item_id_on_api")
+    private Long lineItemIdOnApi;
 
     @Column(name = "quantity")
     private Integer quantity;
@@ -41,7 +45,7 @@ public class LineItem {
     @Column(name = "product_id")
     private Long productId;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="order_id", referencedColumnName = "id")
     @JsonIgnore
     private Order order;
