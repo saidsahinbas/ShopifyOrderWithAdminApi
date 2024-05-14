@@ -3,6 +3,8 @@ package com.Saiddev.ShopifyOrderTracking.service;
 import com.Saiddev.ShopifyOrderTracking.dto.LineItemDto;
 import com.Saiddev.ShopifyOrderTracking.entity.LineItem;
 import com.Saiddev.ShopifyOrderTracking.repository.LineItemRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,8 +21,8 @@ public class LineItemService {
         return lineItemRepository.save(lineItem);
     }
 
-    public List<LineItem> getAllLineItems(){
-        return lineItemRepository.findAll();
+    public Page<LineItem> getAllLineItems(Pageable pageable){
+        return lineItemRepository.findAll(pageable);
     }
 
 }

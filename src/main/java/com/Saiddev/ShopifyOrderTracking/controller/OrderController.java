@@ -48,8 +48,12 @@ public class OrderController {
     }
 
     @GetMapping("/all-items")
-    public List<LineItem> getLineItems(){
-        return lineItemService.getAllLineItems();
+    public ResponseEntity<Page<LineItem>> getLineItems(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                       @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<LineItem> lineItems = lineItemService.getAllLineItems(pageable);
+        return new ResponseEntity<>(lineItems, HttpStatus.OK);
     }
 
     @GetMapping("/all-customer")
@@ -60,12 +64,6 @@ public class OrderController {
         return new ResponseEntity<>(customers, HttpStatus.OK);
     }
 
-    /*
-    @GetMapping("/all")
-    public ResponseEntity<List<Order>> getAllOrders() {
-        return new ResponseEntity<>(orderService.getAllOrders(), HttpStatus.OK);
-    }
-    */
 
     @GetMapping("/order")
     public Optional<Order> getCurrenciesByCurrencyName(@RequestParam(name = "id") Long id) {
