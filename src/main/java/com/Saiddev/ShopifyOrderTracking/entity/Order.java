@@ -50,7 +50,7 @@ public class Order {
     private String paymentStatus;
 
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     private Customer customer;
 }

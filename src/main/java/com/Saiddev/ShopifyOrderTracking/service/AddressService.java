@@ -16,5 +16,8 @@ public class AddressService {
         return addressRepository.save(address);
     }
 
+    public Address getAddressByIdOnApi(Long addressIdOnApi){
+        return addressRepository.findByAddressIdOnApi(addressIdOnApi);
+    }
 }
 

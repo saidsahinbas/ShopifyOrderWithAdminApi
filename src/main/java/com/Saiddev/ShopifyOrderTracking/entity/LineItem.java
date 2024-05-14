@@ -45,7 +45,7 @@ public class LineItem {
     @Column(name = "product_id")
     private Long productId;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name="order_id", referencedColumnName = "id")
     private Order order;
 }

@@ -55,71 +55,90 @@ public class ShopifyAdminApiResource {
         OrderListDto orderListDto = gson.fromJson(response.body(), OrderListDto.class);
 
         for (OrderDto orderDto : orderListDto.getOrderDtos()) {
-            Order order = new Order();
-
-            order.setOrderIdOnApi(orderDto.getId());
-            order.setOrderName(orderDto.getName());
-            order.setContactEmail(orderDto.getContactEmail());
-            order.setCreatedAt(orderDto.getCreatedAt());
-            order.setTax(orderDto.getCurrentTotalTax());
-            order.setTotalPrice(orderDto.getTotalPrice());
-            order.setFulfilmentStatus(orderDto.getFulfilment() == null ? "unfulfilled" : orderDto.getFulfilment());
-            order.setPaymentStatus(orderDto.getFinancialStatus());
-
-            LineItem lineItem = new LineItem();
-
-            lineItem.setOrder(order);
-            for (LineItemDto lineItemDto : orderDto.getLine_items()) {
-                lineItem.setLineItemIdOnApi(lineItemDto.getId());
-                lineItem.setGrams(lineItemDto.getGrams());
-                lineItem.setIsGiftCard(lineItemDto.getGift());
-                lineItem.setProductName(lineItemDto.getName());
-                lineItem.setPrice(lineItemDto.getPrice());
-                lineItem.setProductId(lineItemDto.getProductId());
-                lineItem.setQuantity(lineItemDto.getCurrentQuantity());
-
-                lineItemService.saveLineItem(lineItem);
-            }
-
-            Customer customer = new Customer();
-            Customer bilinmeyenMusteri = new Customer(99L, 9999L, "bilimeyen@bilinmeyen", new Date(), new Date(), "bilinmeyen", "bilinmeyen", "TRY", "+900000000000");
-            Address address = new Address();
-            Address bilinmeyenAddress = new Address(99L, 11111111L, "Msinan mah", "corum", "Turkey", "19000", "TRY", false, customer);
-
-            CustomerDto customerDto = orderDto.getCustomerDtos();
-
-            if (customerDto == null) {
-                customer = bilinmeyenMusteri;
-            } else {
-                AddressDto addressDto = customerDto.getAddressDtos();
-                if (addressDto == null) {
-                    address = bilinmeyenAddress;
-                } else {
-                    address.setAddressIdOnApi(addressDto.getId());
-                    address.setAddress(addressDto.getAddress1() + " " + addressDto.getAddress2());
-                    address.setCity(addressDto.getCity());
-                    address.setCountry(addressDto.getCountry());
-                    address.setZip(addressDto.getZip());
-                    address.setCountryCode(addressDto.getCountryCode());
-                    address.setIsDefaultAddress(addressDto.getIsDefaultCustomerAddress());
-                    address.setCustomer(customer);
-                }
-                customer.setCustomerIdOnApi(customerDto.getId());
-                customer.setEmail(customerDto.getEmail());
-                customer.setCreatedAt(customerDto.getCreatedAt());
-                customer.setUpdatedAt(customerDto.getUpdatedAt());
-                customer.setFirstName(customerDto.getFirstName());
-                customer.setLastName(customerDto.getLastName());
-                customer.setCurrency(customerDto.getCurrency());
-                customer.setPhone(customerDto.getPhone());
-            }
-
+            Order order = createOrderFromDto(orderDto);
+            Customer customer = createCustomerFromDto(orderDto.getCustomerDtos());
+            Address address = createAddressFromDto(orderDto.getCustomerDtos(), customer);
 
             customerService.saveCustomer(customer);
             addressService.saveAddress(address);
             order.setCustomer(customer);
             orderService.saveOrder(order);
 
+            processLineItems(orderDto, order);
+        }
+    }
+
+    private Order createOrderFromDto(OrderDto orderDto) {
+        Order order = new Order();
+        order.setOrderIdOnApi(orderDto.getId());
+        order.setOrderName(orderDto.getName());
+        order.setContactEmail(orderDto.getContactEmail());
+        order.setCreatedAt(orderDto.getCreatedAt());
+        order.setTax(orderDto.getCurrentTotalTax());
+        order.setTotalPrice(orderDto.getTotalPrice());
+        order.setFulfilmentStatus(orderDto.getFulfilment() == null ? "unfulfilled" : orderDto.getFulfilment());
+        order.setPaymentStatus(orderDto.getFinancialStatus());
+        return order;
+    }
+
+    private Customer createCustomerFromDto(CustomerDto customerDto) {
+        if (customerDto == null) {
+            // Customer information is missing, use placeholder customer
+            return new Customer(1L, 9999L, "bilimeyen@bilinmeyen", new Date(), new Date(), "bilinmeyen", "bilinmeyen", "TRY", "+900000000000");
+        } else {
+            // Check if customer with the same API ID already exists
+            Customer customer = customerService.findByCustomerIdOnApi(customerDto.getId());
+            if (customer == null) {
+                // Customer doesn't exist, create a new one
+                customer = new Customer();
+            }
+            // Set customer properties
+            customer.setCustomerIdOnApi(customerDto.getId());
+            customer.setEmail(customerDto.getEmail());
+            customer.setCreatedAt(customerDto.getCreatedAt());
+            customer.setCurrency(customerDto.getCurrency());
+            customer.setFirstName(customerDto.getFirstName());
+            customer.setLastName(customerDto.getLastName());
+            customer.setPhone(customerDto.getPhone());
+            customer.setUpdatedAt(customerDto.getUpdatedAt());
+            return customer;
+        }
+    }
+
+    private Address createAddressFromDto(CustomerDto customerDto, Customer customer) {
+        if (customerDto == null || customerDto.getAddressDtos() == null) {
+            return new Address(1L, 11111111L, "Msinan mah", "corum", "Turkey", "19000", "TRY", true, customer);
+        } else {
+            AddressDto addressDto = customerDto.getAddressDtos();
+            Address address = addressService.getAddressByIdOnApi(addressDto.getId());
+            if (address == null) {
+                address = new Address();
+            }
+            address.setAddressIdOnApi(addressDto.getId());
+            address.setAddress(addressDto.getAddress1() + " " + addressDto.getAddress2());
+            address.setCity(addressDto.getCity());
+            address.setCountry(addressDto.getCountry());
+            address.setZip(addressDto.getZip());
+            address.setCountryCode(addressDto.getCountryCode());
+            address.setIsDefaultAddress(addressDto.getIsDefaultCustomerAddress());
+            address.setCustomer(customer);
+            // Yönetilen bir duruma getir
+            return address;
+        }
+    }
+
+    private void processLineItems(OrderDto orderDto, Order order) {
+        for (LineItemDto lineItemDto : orderDto.getLine_items()) {
+            LineItem lineItem = new LineItem();
+            lineItem.setOrder(order);
+            lineItem.setLineItemIdOnApi(lineItemDto.getId());
+            lineItem.setGrams(lineItemDto.getGrams());
+            lineItem.setIsGiftCard(lineItemDto.getGift());
+            lineItem.setProductName(lineItemDto.getName());
+            lineItem.setPrice(lineItemDto.getPrice());
+            lineItem.setProductId(lineItemDto.getProductId());
+            lineItem.setQuantity(lineItemDto.getCurrentQuantity());
+            lineItemService.saveLineItem(lineItem);
         }
     }
 }
