@@ -40,12 +40,6 @@ public class Customer {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "order_count")
-    private Integer orderCount;
-
-    @Column(name = "total_spent")
-    private Double totalSpent;
-
     @Column(name = "currency")
     private String currency;
 

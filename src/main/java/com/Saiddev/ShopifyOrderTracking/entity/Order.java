@@ -52,6 +52,5 @@ public class Order {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
-    @JsonIgnore
     private Customer customer;
 }

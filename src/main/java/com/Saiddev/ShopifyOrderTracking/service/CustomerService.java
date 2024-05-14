@@ -2,10 +2,11 @@ package com.Saiddev.ShopifyOrderTracking.service;
 
 import com.Saiddev.ShopifyOrderTracking.entity.Customer;
 import com.Saiddev.ShopifyOrderTracking.repository.CustomerRepository;
-import com.google.gson.annotations.SerializedName;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CustomerService {
@@ -20,8 +21,11 @@ public class CustomerService {
     }
 
 
-    public List<Customer> getAllCustomer(){
-        return customerRepository.findAll();
+    public Page<Customer> getAllCustomer(Pageable pageable){
+        return customerRepository.findAll(pageable);
     }
 
+    public Customer findByCustomerIdOnApi(Long customerId) {
+        return customerRepository.findByCustomerIdOnApi(customerId);
+    }
 }

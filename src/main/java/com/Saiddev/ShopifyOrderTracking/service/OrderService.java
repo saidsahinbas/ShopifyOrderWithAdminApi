@@ -4,6 +4,8 @@ import com.Saiddev.ShopifyOrderTracking.entity.Order;
 import com.Saiddev.ShopifyOrderTracking.repository.OrderRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +17,9 @@ import java.util.Optional;
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final EntityManager entityManager;
 
-    public OrderService(OrderRepository orderRepository, EntityManager entityManager){
+    public OrderService(OrderRepository orderRepository){
         this.orderRepository = orderRepository;
-        this.entityManager = entityManager;
-
     }
 
     public Order saveOrder(Order order){
@@ -28,9 +27,9 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    public List<Order> getAllOrders(){
+    public Page<Order> getAllOrders(Pageable pageable){
 
-        return orderRepository.findAll();
+        return orderRepository.findAll(pageable);
     }
 
     public Optional<Order> findByOrderWithId(Long id) {
@@ -41,9 +40,4 @@ public class OrderService {
         return orderRepository.findByCreatedAtBetweenOrderByCreatedAtDesc(startDate, endDate);
     }
 
-
-    //get Order with id
-
-    //get order with address
-    //etc...
 }

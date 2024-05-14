@@ -27,9 +27,6 @@ public class CustomerDto {
     @SerializedName("last_name")
     private String lastName;
 
-    @SerializedName("total_spent")
-    private Double totalSpent;
-
     @SerializedName("currency")
     private String currency;
 

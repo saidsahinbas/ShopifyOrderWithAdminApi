@@ -17,4 +17,8 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByFulfilmentStatus(@Param("name") String name);
 
-    List<Order> findByCreatedAtBetweenOrderByCreatedAtDesc(Date startDate, Date endDate);}
+    Page<Order> findAll(Pageable pageable);
+
+    List<Order> findByCreatedAtBetweenOrderByCreatedAtDesc(Date startDate, Date endDate);
+
+}

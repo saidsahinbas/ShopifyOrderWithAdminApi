@@ -47,6 +47,5 @@ public class LineItem {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="order_id", referencedColumnName = "id")
-    @JsonIgnore
     private Order order;
 }

@@ -43,7 +43,7 @@ public class ShopifyAdminApiResource {
     }
 
 
-    @Scheduled(fixedRate = 1000000, initialDelay = 900000000)
+    @Scheduled(fixedRate = 1000000)
     public void fetchOrders() throws IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -56,7 +56,6 @@ public class ShopifyAdminApiResource {
 
         for (OrderDto orderDto : orderListDto.getOrderDtos()) {
             Order order = new Order();
-            //System.out.println(orderDto);
 
             order.setOrderIdOnApi(orderDto.getId());
             order.setOrderName(orderDto.getName());
@@ -67,14 +66,10 @@ public class ShopifyAdminApiResource {
             order.setFulfilmentStatus(orderDto.getFulfilment() == null ? "unfulfilled" : orderDto.getFulfilment());
             order.setPaymentStatus(orderDto.getFinancialStatus());
 
-            //LineItemListDto lineItemListDto = orderDto.getLineItemListDto();
             LineItem lineItem = new LineItem();
 
             lineItem.setOrder(order);
             for (LineItemDto lineItemDto : orderDto.getLine_items()) {
-
-                //System.out.println(lineItemDto);
-
                 lineItem.setLineItemIdOnApi(lineItemDto.getId());
                 lineItem.setGrams(lineItemDto.getGrams());
                 lineItem.setIsGiftCard(lineItemDto.getGift());
@@ -87,7 +82,7 @@ public class ShopifyAdminApiResource {
             }
 
             Customer customer = new Customer();
-            Customer bilinmeyenMusteri = new Customer(99L, 9999L, "bilimeyen@bilinmeyen", new Date(), new Date(), "bilinmeyen", "bilinmeyen", 0, 0.0, "TRY", "+900000000000");
+            Customer bilinmeyenMusteri = new Customer(99L, 9999L, "bilimeyen@bilinmeyen", new Date(), new Date(), "bilinmeyen", "bilinmeyen", "TRY", "+900000000000");
             Address address = new Address();
             Address bilinmeyenAddress = new Address(99L, 11111111L, "Msinan mah", "corum", "Turkey", "19000", "TRY", false, customer);
 
@@ -95,13 +90,10 @@ public class ShopifyAdminApiResource {
 
             if (customerDto == null) {
                 customer = bilinmeyenMusteri;
-                //customerService.saveCustomer(customer);
-
             } else {
                 AddressDto addressDto = customerDto.getAddressDtos();
                 if (addressDto == null) {
                     address = bilinmeyenAddress;
-                    //addressService.saveAddress(address);
                 } else {
                     address.setAddressIdOnApi(addressDto.getId());
                     address.setAddress(addressDto.getAddress1() + " " + addressDto.getAddress2());
@@ -111,7 +103,6 @@ public class ShopifyAdminApiResource {
                     address.setCountryCode(addressDto.getCountryCode());
                     address.setIsDefaultAddress(addressDto.getIsDefaultCustomerAddress());
                     address.setCustomer(customer);
-                    //addressService.saveAddress(address);
                 }
                 customer.setCustomerIdOnApi(customerDto.getId());
                 customer.setEmail(customerDto.getEmail());
@@ -119,10 +110,8 @@ public class ShopifyAdminApiResource {
                 customer.setUpdatedAt(customerDto.getUpdatedAt());
                 customer.setFirstName(customerDto.getFirstName());
                 customer.setLastName(customerDto.getLastName());
-                customer.setTotalSpent(customerDto.getTotalSpent());
                 customer.setCurrency(customerDto.getCurrency());
                 customer.setPhone(customerDto.getPhone());
-                //customerService.saveCustomer(customer);
             }
 
 
@@ -133,6 +122,5 @@ public class ShopifyAdminApiResource {
 
         }
     }
-
 }
 
