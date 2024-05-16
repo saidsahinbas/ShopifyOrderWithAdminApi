@@ -9,4 +9,6 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 @RepositoryRestResource(collectionResourceRel = "items", path = "items")
 public interface LineItemRepository extends JpaRepository<LineItem, Long> {
     Page<LineItem> findAll(Pageable pageable);
+
+    LineItem findByLineItemIdOnApi(Long lineItemIdOnApi);
 }

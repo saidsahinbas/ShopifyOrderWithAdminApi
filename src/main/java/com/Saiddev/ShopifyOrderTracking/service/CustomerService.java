@@ -2,6 +2,7 @@ package com.Saiddev.ShopifyOrderTracking.service;
 
 import com.Saiddev.ShopifyOrderTracking.entity.Customer;
 import com.Saiddev.ShopifyOrderTracking.repository.CustomerRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class CustomerService {
     private final CustomerRepository customerRepository;
 

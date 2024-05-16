@@ -7,6 +7,8 @@ import com.Saiddev.ShopifyOrderTracking.entity.LineItem;
 import com.Saiddev.ShopifyOrderTracking.entity.Order;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -17,11 +19,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Date;
+import java.util.Optional;
 
 @Component
 public class ShopifyAdminApiResource {
-
-    ObjectMapper objectMapper = new ObjectMapper();
 
     private final Gson gson;
     private final OrderService orderService;
@@ -42,20 +43,22 @@ public class ShopifyAdminApiResource {
         this.gson = gson;
     }
 
+    @Value("${shopify.access.key}")
+    private String shopifyAccessKey;
 
-    @Scheduled(fixedRate = 1000000)
+    @Scheduled(fixedRate = 300000)
     public void fetchOrders() throws IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://mp-integrator-test-2.myshopify.com/admin/api/2024-04/orders.json?status=any"))
-                .header("X-Shopify-Access-Token", "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")
+                .header("X-Shopify-Access-Token", shopifyAccessKey)
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         OrderListDto orderListDto = gson.fromJson(response.body(), OrderListDto.class);
 
         for (OrderDto orderDto : orderListDto.getOrderDtos()) {
-            Order order = createOrderFromDto(orderDto);
+            Order order = createOrUpdateOrderFromDto(orderDto);
             Customer customer = createCustomerFromDto(orderDto.getCustomerDtos());
             Address address = createAddressFromDto(orderDto.getCustomerDtos(), customer);
 
@@ -67,9 +70,16 @@ public class ShopifyAdminApiResource {
             processLineItems(orderDto, order);
         }
     }
+    private Order createOrUpdateOrderFromDto(OrderDto orderDto) {
+        Order order = orderService.findByOrderIdOnApi(orderDto.getId());
+        if (order == null) {
+            order = new Order();
+        }
+        updateOrder(order, orderDto);
+        return order;
+    }
 
-    private Order createOrderFromDto(OrderDto orderDto) {
-        Order order = new Order();
+    private void updateOrder(Order order, OrderDto orderDto) {
         order.setOrderIdOnApi(orderDto.getId());
         order.setOrderName(orderDto.getName());
         order.setContactEmail(orderDto.getContactEmail());
@@ -78,15 +88,12 @@ public class ShopifyAdminApiResource {
         order.setTotalPrice(orderDto.getTotalPrice());
         order.setFulfilmentStatus(orderDto.getFulfilment() == null ? "unfulfilled" : orderDto.getFulfilment());
         order.setPaymentStatus(orderDto.getFinancialStatus());
-        return order;
     }
 
     private Customer createCustomerFromDto(CustomerDto customerDto) {
         if (customerDto == null) {
-            // Customer information is missing, use placeholder customer
             return new Customer(1L, 9999L, "bilimeyen@bilinmeyen", new Date(), new Date(), "bilinmeyen", "bilinmeyen", "TRY", "+900000000000");
         } else {
-            // Check if customer with the same API ID already exists
             Customer customer = customerService.findByCustomerIdOnApi(customerDto.getId());
             if (customer == null) {
                 // Customer doesn't exist, create a new one
@@ -122,24 +129,36 @@ public class ShopifyAdminApiResource {
             address.setCountryCode(addressDto.getCountryCode());
             address.setIsDefaultAddress(addressDto.getIsDefaultCustomerAddress());
             address.setCustomer(customer);
-            // Yönetilen bir duruma getir
             return address;
         }
     }
 
+
     private void processLineItems(OrderDto orderDto, Order order) {
         for (LineItemDto lineItemDto : orderDto.getLine_items()) {
-            LineItem lineItem = new LineItem();
-            lineItem.setOrder(order);
-            lineItem.setLineItemIdOnApi(lineItemDto.getId());
-            lineItem.setGrams(lineItemDto.getGrams());
-            lineItem.setIsGiftCard(lineItemDto.getGift());
-            lineItem.setProductName(lineItemDto.getName());
-            lineItem.setPrice(lineItemDto.getPrice());
-            lineItem.setProductId(lineItemDto.getProductId());
-            lineItem.setQuantity(lineItemDto.getCurrentQuantity());
+            LineItem lineItem = createOrUpdateLineItemFromDto(lineItemDto, order);
             lineItemService.saveLineItem(lineItem);
         }
+    }
+
+    private LineItem createOrUpdateLineItemFromDto(LineItemDto lineItemDto, Order order) {
+        LineItem lineItem = lineItemService.findLineItemByIdOnApi(lineItemDto.getId());
+        if (lineItem == null) {
+            lineItem = new LineItem();
+        }
+        updateLineItem(lineItem, lineItemDto, order);
+        return lineItem;
+    }
+
+    private void updateLineItem(LineItem lineItem, LineItemDto lineItemDto, Order order) {
+        lineItem.setOrder(order);
+        lineItem.setLineItemIdOnApi(lineItemDto.getId());
+        lineItem.setGrams(lineItemDto.getGrams());
+        lineItem.setIsGiftCard(lineItemDto.getGift());
+        lineItem.setProductName(lineItemDto.getName());
+        lineItem.setPrice(lineItemDto.getPrice());
+        lineItem.setProductId(lineItemDto.getProductId());
+        lineItem.setQuantity(lineItemDto.getCurrentQuantity());
     }
 }
 

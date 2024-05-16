@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class OrderService {
     private final OrderRepository orderRepository;
 
@@ -28,7 +29,6 @@ public class OrderService {
     }
 
     public Page<Order> getAllOrders(Pageable pageable){
-
         return orderRepository.findAll(pageable);
     }
 
@@ -40,4 +40,7 @@ public class OrderService {
         return orderRepository.findByCreatedAtBetweenOrderByCreatedAtDesc(startDate, endDate);
     }
 
+    public Order findByOrderIdOnApi(Long orderIdOnApi) {
+        return orderRepository.findByOrderIdOnApi(orderIdOnApi);
+    }
 }
