@@ -49,7 +49,7 @@ public class Order {
     @Column(name = "payment_status")
     private String paymentStatus;
 
-
+    //fk -> Customer
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     private Customer customer;
