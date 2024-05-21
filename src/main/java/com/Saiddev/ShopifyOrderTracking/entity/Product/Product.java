@@ -1,5 +1,6 @@
 package com.Saiddev.ShopifyOrderTracking.entity.Product;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +9,9 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -38,6 +41,13 @@ public class Product {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    //TODO: del
     @Column(name = "published_at")
     private Date publishedAt;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product", cascade = CascadeType.ALL)
+    private Set<Image> images = new HashSet<>();
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product", cascade = CascadeType.ALL)
+    private Set<Variant> variants = new HashSet<>();
 }

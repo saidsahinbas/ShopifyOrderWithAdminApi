@@ -49,6 +49,8 @@ public class Order {
     @Column(name = "payment_status")
     private String paymentStatus;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private Set<LineItem> lineItems = new HashSet<>();
     //fk -> Customer
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "id")

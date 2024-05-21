@@ -3,6 +3,8 @@ package com.Saiddev.ShopifyOrderTracking.service.productService;
 import com.Saiddev.ShopifyOrderTracking.entity.Product.Product;
 import com.Saiddev.ShopifyOrderTracking.repository.ProductRepository.ProductRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +27,7 @@ public class ProductService {
         return productRepository.findProductByProductIdOnApi(productId);
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public Page<Product> getAllProductsWithPagination(Pageable pageable){
+        return productRepository.findAll(pageable);
     }
 }

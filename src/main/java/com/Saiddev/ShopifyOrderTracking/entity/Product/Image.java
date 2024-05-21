@@ -1,5 +1,6 @@
 package com.Saiddev.ShopifyOrderTracking.entity.Product;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +23,7 @@ public class Image {
 
     @Column(name = "image_id_on_api")
     private Long imageIdOnApi;
-
+    //TODO
     @Column(name = "alt")
     private String alt;
 
@@ -44,5 +45,6 @@ public class Image {
     //fk -> Product
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", referencedColumnName = "id")
+    @JsonIgnore
     private Product product;
 }

@@ -1,5 +1,6 @@
 package com.Saiddev.ShopifyOrderTracking.entity.Product;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,7 +31,7 @@ public class Variant {
 
     @Column(name = "price")
     private Double price;
-
+    //TODo
     @Column(name = "fulfillment_service")
     private String fulfilmentService;
 
@@ -46,5 +47,6 @@ public class Variant {
     //fk -> Product
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", referencedColumnName = "id")
+    @JsonIgnore
     private Product product;
 }

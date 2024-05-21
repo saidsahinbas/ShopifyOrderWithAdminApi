@@ -39,7 +39,7 @@ public class Customer {
 
     @Column(name = "last_name")
     private String lastName;
-
+    //TODO
     @Column(name = "currency")
     private String currency;
 
