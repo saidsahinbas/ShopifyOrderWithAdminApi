@@ -23,9 +23,6 @@ public class Image {
 
     @Column(name = "image_id_on_api")
     private Long imageIdOnApi;
-    //TODO
-    @Column(name = "alt")
-    private String alt;
 
     @Column(name = "created_at")
     private Date createdAt;

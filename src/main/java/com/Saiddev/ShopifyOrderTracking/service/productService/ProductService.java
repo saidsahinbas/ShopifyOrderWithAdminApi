@@ -1,13 +1,11 @@
 package com.Saiddev.ShopifyOrderTracking.service.productService;
 
 import com.Saiddev.ShopifyOrderTracking.entity.Product.Product;
-import com.Saiddev.ShopifyOrderTracking.repository.ProductRepository.ProductRepository;
+import com.Saiddev.ShopifyOrderTracking.repository.Product.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @Transactional

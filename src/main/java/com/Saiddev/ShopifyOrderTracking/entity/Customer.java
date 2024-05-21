@@ -1,5 +1,6 @@
 package com.Saiddev.ShopifyOrderTracking.entity;
 
+import com.Saiddev.ShopifyOrderTracking.entity.shop.Shop;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,11 +40,11 @@ public class Customer {
 
     @Column(name = "last_name")
     private String lastName;
-    //TODO
-    @Column(name = "currency")
-    private String currency;
 
     @Column(name = "phone")
     private String phone;
 
+    @ManyToOne
+    @JoinColumn(name = "shop_id", referencedColumnName = "id")
+    private Shop shop;
 }

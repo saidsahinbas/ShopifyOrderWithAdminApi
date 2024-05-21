@@ -5,21 +5,16 @@ import com.Saiddev.ShopifyOrderTracking.entity.Address;
 import com.Saiddev.ShopifyOrderTracking.entity.Customer;
 import com.Saiddev.ShopifyOrderTracking.entity.LineItem;
 import com.Saiddev.ShopifyOrderTracking.entity.Order;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.Saiddev.ShopifyOrderTracking.entity.shop.Shop;
+import com.Saiddev.ShopifyOrderTracking.service.shop.ShopService;
 import com.google.gson.Gson;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Date;
-import java.util.Optional;
+import java.util.List;
 
 @Component
 public class ShopifyAdminApiResource {
@@ -29,47 +24,50 @@ public class ShopifyAdminApiResource {
     private final LineItemService lineItemService;
     private final AddressService addressService;
     private final CustomerService customerService;
+    private final ShopService shopService;
 
 
     public ShopifyAdminApiResource(OrderService orderService,
                                    Gson gson,
                                    LineItemService lineItemService,
                                    AddressService addressService,
-                                   CustomerService customerService) {
+                                   CustomerService customerService,
+                                   ShopService shopService) {
         this.orderService = orderService;
         this.lineItemService = lineItemService;
         this.addressService = addressService;
         this.customerService = customerService;
         this.gson = gson;
+        this.shopService = shopService;
     }
 
-    @Value("${shopify.access.key}")
-    private String shopifyAccessKey;
 
-    @Scheduled(fixedRate = 300000)
+    @Scheduled(fixedRate = 3000)
     public void fetchOrders() throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://mp-integrator-test-2.myshopify.com/admin/api/2024-04/orders.json?status=any"))
-                .header("X-Shopify-Access-Token", shopifyAccessKey)
-                .build();
+        List<Shop> shops = shopService.getAllShopFromDb();
+        for (Shop shop : shops) {
+            String shopName = shop.getShopName();
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        OrderListDto orderListDto = gson.fromJson(response.body(), OrderListDto.class);
+            HttpResponse<String> response = shopService.getOrderResponseFromDifferentShop(shopName);
+            OrderListDto orderListDto = gson.fromJson(response.body(), OrderListDto.class);
 
-        for (OrderDto orderDto : orderListDto.getOrderDtos()) {
-            Order order = createOrUpdateOrderFromDto(orderDto);
-            Customer customer = createCustomerFromDto(orderDto.getCustomerDtos());
-            Address address = createAddressFromDto(orderDto.getCustomerDtos(), customer);
+            for (OrderDto orderDto : orderListDto.getOrderDtos()) {
+                Order order = createOrUpdateOrderFromDto(orderDto);
+                order.setShop(shop);
+                Customer customer = createCustomerFromDto(orderDto.getCustomerDtos());
+                customer.setShop(shop);
+                Address address = createAddressFromDto(orderDto.getCustomerDtos(), customer);
 
-            customerService.saveCustomer(customer);
-            addressService.saveAddress(address);
-            order.setCustomer(customer);
-            orderService.saveOrder(order);
+                customerService.saveCustomer(customer);
+                addressService.saveAddress(address);
+                order.setCustomer(customer);
+                orderService.saveOrder(order);
 
-            processLineItems(orderDto, order);
+                processLineItems(orderDto, order);
+            }
         }
     }
+
     private Order createOrUpdateOrderFromDto(OrderDto orderDto) {
         Order order = orderService.findByOrderIdOnApi(orderDto.getId());
         if (order == null) {
@@ -92,7 +90,7 @@ public class ShopifyAdminApiResource {
 
     private Customer createCustomerFromDto(CustomerDto customerDto) {
         if (customerDto == null) {
-            return new Customer(1L, 9999L, "bilimeyen@bilinmeyen", new Date(), new Date(), "bilinmeyen", "bilinmeyen", "TRY", "+900000000000");
+            return new Customer(1L, 9999L, "bilimeyen@bilinmeyen", new Date(), new Date(), "bilinmeyen", "bilinmeyen", "TRY", shopService.findShopByShopName("mp-integrator-2"));
         } else {
             Customer customer = customerService.findByCustomerIdOnApi(customerDto.getId());
             if (customer == null) {
@@ -103,7 +101,6 @@ public class ShopifyAdminApiResource {
             customer.setCustomerIdOnApi(customerDto.getId());
             customer.setEmail(customerDto.getEmail());
             customer.setCreatedAt(customerDto.getCreatedAt());
-            customer.setCurrency(customerDto.getCurrency());
             customer.setFirstName(customerDto.getFirstName());
             customer.setLastName(customerDto.getLastName());
             customer.setPhone(customerDto.getPhone());
@@ -153,9 +150,7 @@ public class ShopifyAdminApiResource {
     private void updateLineItem(LineItem lineItem, LineItemDto lineItemDto, Order order) {
         lineItem.setOrder(order);
         lineItem.setLineItemIdOnApi(lineItemDto.getId());
-        lineItem.setGrams(lineItemDto.getGrams());
         lineItem.setIsGiftCard(lineItemDto.getGift());
-        lineItem.setProductName(lineItemDto.getName());
         lineItem.setPrice(lineItemDto.getPrice());
         lineItem.setProductId(lineItemDto.getProductId());
         lineItem.setQuantity(lineItemDto.getCurrentQuantity());

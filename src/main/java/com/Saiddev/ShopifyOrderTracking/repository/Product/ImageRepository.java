@@ -1,4 +1,4 @@
-package com.Saiddev.ShopifyOrderTracking.repository.ProductRepository;
+package com.Saiddev.ShopifyOrderTracking.repository.Product;
 
 import com.Saiddev.ShopifyOrderTracking.entity.Product.Image;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,7 +1,7 @@
 package com.Saiddev.ShopifyOrderTracking.service.productService;
 
 import com.Saiddev.ShopifyOrderTracking.entity.Product.Image;
-import com.Saiddev.ShopifyOrderTracking.repository.ProductRepository.ImageRepository;
+import com.Saiddev.ShopifyOrderTracking.repository.Product.ImageRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 

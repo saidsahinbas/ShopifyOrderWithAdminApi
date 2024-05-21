@@ -15,7 +15,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-@RepositoryRestResource(collectionResourceRel = "orders", path = "orders")
 public interface OrderRepository extends JpaRepository<Order, Long>, CrudRepository<Order, Long> {
     List<Order> findByFulfilmentStatus(@Param("name") String name);
 

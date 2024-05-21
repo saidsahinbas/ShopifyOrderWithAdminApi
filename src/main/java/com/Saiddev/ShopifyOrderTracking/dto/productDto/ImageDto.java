@@ -10,9 +10,6 @@ public class ImageDto {
     @SerializedName("id")
     private Long id;
 
-    @SerializedName("alt")
-    private String alt;
-
     @SerializedName("created_at")
     private Date createdAt;
 

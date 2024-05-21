@@ -1,5 +1,6 @@
 package com.Saiddev.ShopifyOrderTracking.entity;
 
+import com.Saiddev.ShopifyOrderTracking.entity.shop.Shop;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -51,8 +52,12 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private Set<LineItem> lineItems = new HashSet<>();
-    //fk -> Customer
+
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     private Customer customer;
+
+    @ManyToOne
+    @JoinColumn(name = "shop_id", referencedColumnName = "id")
+    private Shop shop;
 }

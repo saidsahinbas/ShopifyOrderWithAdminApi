@@ -1,23 +1,17 @@
 package com.Saiddev.ShopifyOrderTracking.service.productService;
 
-import com.Saiddev.ShopifyOrderTracking.dto.LineItemDto;
-import com.Saiddev.ShopifyOrderTracking.dto.OrderDto;
 import com.Saiddev.ShopifyOrderTracking.dto.productDto.*;
-import com.Saiddev.ShopifyOrderTracking.entity.LineItem;
-import com.Saiddev.ShopifyOrderTracking.entity.Order;
 import com.Saiddev.ShopifyOrderTracking.entity.Product.Image;
 import com.Saiddev.ShopifyOrderTracking.entity.Product.Product;
 import com.Saiddev.ShopifyOrderTracking.entity.Product.Variant;
+import com.Saiddev.ShopifyOrderTracking.entity.shop.Shop;
+import com.Saiddev.ShopifyOrderTracking.service.shop.ShopService;
 import com.google.gson.Gson;
-import org.aspectj.weaver.ast.Var;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 
@@ -31,53 +25,53 @@ public class ShopifyProductApiResource {
 
     private final ImageService imageService;
 
+    private final ShopService shopService;
+
     public ShopifyProductApiResource(ProductService productService,
                                      VariantService variantService,
                                      ImageService imageService,
-                                     Gson gson){
+                                     Gson gson,
+                                     ShopService shopService) {
         this.productService = productService;
         this.variantService = variantService;
         this.imageService = imageService;
         this.gson = gson;
+        this.shopService = shopService;
     }
 
-    @Value("${shopify.access.key}")
-    private String shopifyAccessKey;
 
     @Scheduled(fixedRate = 300000)
     public void fetchProducts() throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://mp-integrator-test-2.myshopify.com/admin/api/2024-04/products.json"))
-                .header("X-Shopify-Access-Token", shopifyAccessKey)
-                .build();
+        List<Shop> shops = shopService.getAllShopFromDb();
+        for (Shop shop : shops) {
+            String shopName = shop.getShopName();
+            HttpResponse<String> response = shopService.getProductResponseFromDifferentShop(shopName);
+            ProductListDto productListDto = gson.fromJson(response.body(), ProductListDto.class);
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        ProductListDto productListDto = gson.fromJson(response.body(), ProductListDto.class);
+            for (ProductDto productDto : productListDto.getProductDtos()) {
+                Product product = createOrUpdateProductFromDto(productDto);
+                product.setShop(shop);
+                productService.saveProduct(product);
 
-        for (ProductDto productDto: productListDto.getProductDtos()){
-            Product product = createOrUpdateProductFromDto(productDto);
-            productService.saveProduct(product);
-
-            processImages(productDto, product);
-            processVariants(productDto, product);
+                processImages(productDto, product);
+                processVariants(productDto, product);
+            }
         }
     }
 
     private Product createOrUpdateProductFromDto(ProductDto productDto) {
         Product product = productService.findProductWithProductId(productDto.getId());
-        if (product == null){
+        if (product == null) {
             product = new Product();
         }
         updateProduct(product, productDto);
         return product;
     }
 
-    private void updateProduct(Product product, ProductDto productDto){
+    private void updateProduct(Product product, ProductDto productDto) {
         product.setProductIdOnApi(productDto.getId());
         product.setCreatedAt(productDto.getCreatedAt());
         product.setUpdatedAt(productDto.getUpdatedAt());
-        product.setPublishedAt(productDto.getPublishedAt());
         product.setTitle(productDto.getTitle());
         product.setVendor(productDto.getVendor());
     }
@@ -102,7 +96,6 @@ public class ShopifyProductApiResource {
     private void updateImage(Image image, ImageDto imageDto, Product product) {
         image.setProduct(product);
         image.setImageIdOnApi(imageDto.getId());
-        image.setAlt(imageDto.getAlt());
         image.setImageSource(imageDto.getImageSource());
         image.setHeight(imageDto.getHeight());
         image.setWidth(imageDto.getWidth());
@@ -133,7 +126,6 @@ public class ShopifyProductApiResource {
         variant.setTitle(variantDto.getTitle());
         variant.setSku(variantDto.getSku());
         variant.setBarcode(variantDto.getBarcode());
-        variant.setFulfilmentService(variantDto.getFulfillmentService());
         variant.setInventoryQuantity(variantDto.getInventoryQuantity());
         variant.setPrice(variantDto.getPrice());
         variant.setTaxable(variantDto.getTaxable());

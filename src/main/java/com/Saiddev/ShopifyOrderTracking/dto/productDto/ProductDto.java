@@ -24,9 +24,6 @@ public class ProductDto {
     @SerializedName("updated_at")
     private Date updatedAt;
 
-    @SerializedName("published_at")
-    private Date publishedAt;
-
     @SerializedName("variants")
     private List<VariantDto> variantDto;
 

@@ -1,7 +1,7 @@
 package com.Saiddev.ShopifyOrderTracking.service.productService;
 
 import com.Saiddev.ShopifyOrderTracking.entity.Product.Variant;
-import com.Saiddev.ShopifyOrderTracking.repository.ProductRepository.VariantRepository;
+import com.Saiddev.ShopifyOrderTracking.repository.Product.VariantRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 

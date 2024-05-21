@@ -30,16 +30,8 @@ public class LineItem {
     @Column(name = "quantity")
     private Integer quantity;
 
-    //TODO
-    @Column(name = "grams")
-    private Double grams;
-
     @Column(name = "is_gift_card")
     private Boolean isGiftCard;
-
-    //TODO
-    @Column(name = "product_name")
-    private String productName;
 
     @Column(name = "price")
     private Double price;

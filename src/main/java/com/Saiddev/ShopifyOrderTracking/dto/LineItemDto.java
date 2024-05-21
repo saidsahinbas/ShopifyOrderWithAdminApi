@@ -13,9 +13,6 @@ public class LineItemDto {
     @SerializedName("current_quantity")
     private Integer currentQuantity;
 
-    @SerializedName("grams")
-    private Double grams;
-
     @SerializedName("gift_card")
     private Boolean gift;
 

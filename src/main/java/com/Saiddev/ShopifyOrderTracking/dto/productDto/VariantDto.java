@@ -21,9 +21,6 @@ public class VariantDto {
     @SerializedName("price")
     private Double price;
 
-    @SerializedName("fulfillment_service")
-    private String fulfillmentService;
-
     @SerializedName("barcode")
     private String barcode;
 

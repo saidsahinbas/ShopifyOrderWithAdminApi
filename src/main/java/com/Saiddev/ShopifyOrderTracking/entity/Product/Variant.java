@@ -31,9 +31,6 @@ public class Variant {
 
     @Column(name = "price")
     private Double price;
-    //TODo
-    @Column(name = "fulfillment_service")
-    private String fulfilmentService;
 
     @Column(name = "barcode")
     private String barcode;
