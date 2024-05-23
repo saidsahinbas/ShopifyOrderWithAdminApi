@@ -1,13 +1,21 @@
 package com.Saiddev.ShopifyOrderTracking.service.productService;
 
+import com.Saiddev.ShopifyOrderTracking.dto.OrderDto;
+import com.Saiddev.ShopifyOrderTracking.dto.OrderListDto;
 import com.Saiddev.ShopifyOrderTracking.dto.productDto.*;
+import com.Saiddev.ShopifyOrderTracking.entity.Address;
+import com.Saiddev.ShopifyOrderTracking.entity.Customer;
+import com.Saiddev.ShopifyOrderTracking.entity.Order;
 import com.Saiddev.ShopifyOrderTracking.entity.Product.Image;
 import com.Saiddev.ShopifyOrderTracking.entity.Product.Product;
 import com.Saiddev.ShopifyOrderTracking.entity.Product.Variant;
-import com.Saiddev.ShopifyOrderTracking.entity.shop.Shop;
-import com.Saiddev.ShopifyOrderTracking.service.shop.ShopService;
+import com.Saiddev.ShopifyOrderTracking.entity.shop.ShopPlatform;
+import com.Saiddev.ShopifyOrderTracking.entity.shop.Shopify;
+import com.Saiddev.ShopifyOrderTracking.entity.shop.Trendyol;
+import com.Saiddev.ShopifyOrderTracking.service.shop.ShopPlatformService;
+import com.Saiddev.ShopifyOrderTracking.service.shop.ShopifyService;
+import com.Saiddev.ShopifyOrderTracking.service.shop.TrendyolService;
 import com.google.gson.Gson;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -25,36 +33,51 @@ public class ShopifyProductApiResource {
 
     private final ImageService imageService;
 
-    private final ShopService shopService;
+    private final ShopPlatformService shopPlatformService;
+    private final TrendyolService trendyolService;
+    private final ShopifyService shopifyService;
 
     public ShopifyProductApiResource(ProductService productService,
                                      VariantService variantService,
                                      ImageService imageService,
                                      Gson gson,
-                                     ShopService shopService) {
+                                     ShopPlatformService shopPlatformService,
+                                     TrendyolService trendyolService,
+                                     ShopifyService shopifyService) {
         this.productService = productService;
         this.variantService = variantService;
         this.imageService = imageService;
         this.gson = gson;
-        this.shopService = shopService;
+        this.shopPlatformService = shopPlatformService;
+        this.shopifyService = shopifyService;
+        this.trendyolService = trendyolService;
     }
 
 
     @Scheduled(fixedRate = 300000)
     public void fetchProducts() throws IOException, InterruptedException {
-        List<Shop> shops = shopService.getAllShopFromDb();
-        for (Shop shop : shops) {
-            String shopName = shop.getShopName();
-            HttpResponse<String> response = shopService.getProductResponseFromDifferentShop(shopName);
-            ProductListDto productListDto = gson.fromJson(response.body(), ProductListDto.class);
 
-            for (ProductDto productDto : productListDto.getProductDtos()) {
-                Product product = createOrUpdateProductFromDto(productDto);
-                product.setShop(shop);
-                productService.saveProduct(product);
+        List<ShopPlatform> shopPlatforms = shopPlatformService.getAllShopsFromDb();
+        for (ShopPlatform shopPlatform : shopPlatforms) {
+            if (shopPlatform.getShopPlatformName().equals("trendyol")) {
+                Trendyol trendyol = (Trendyol) shopPlatform;
+                trendyolService.getProductResponseTrendyol(trendyol.getSupplierId());
+            }
+            if (shopPlatform.getShopPlatformName().equals("shopify")) {
+                Shopify shopify = (Shopify) shopPlatform;
 
-                processImages(productDto, product);
-                processVariants(productDto, product);
+                HttpResponse<String> response = shopifyService.getProductResponseShopify(shopify.getShopName());
+                ProductListDto productListDto = gson.fromJson(response.body(), ProductListDto.class);
+
+                for (ProductDto productDto : productListDto.getProductDtos()) {
+                    Product product = createOrUpdateProductFromDto(productDto);
+                    product.setShopPlatform(shopPlatform);
+                    productService.saveProduct(product);
+
+                    processImages(productDto, product);
+                    processVariants(productDto, product);
+                }
+
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.Saiddev.ShopifyOrderTracking.entity.Product;
 
-import com.Saiddev.ShopifyOrderTracking.entity.shop.Shop;
+import com.Saiddev.ShopifyOrderTracking.entity.shop.ShopPlatform;
+import com.Saiddev.ShopifyOrderTracking.entity.shop.Shopify;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -46,6 +47,6 @@ public class Product {
     private Set<Variant> variants = new HashSet<>();
 
     @ManyToOne
-    @JoinColumn(name = "shop_id", referencedColumnName = "id")
-    private Shop shop;
+    @JoinColumn(name = "shop_platform_id", referencedColumnName = "id")
+    private ShopPlatform shopPlatform;
 }

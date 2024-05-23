@@ -1,6 +1,6 @@
 package com.Saiddev.ShopifyOrderTracking.entity;
 
-import com.Saiddev.ShopifyOrderTracking.entity.shop.Shop;
+import com.Saiddev.ShopifyOrderTracking.entity.shop.Shopify;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "customer")
@@ -43,8 +41,4 @@ public class Customer {
 
     @Column(name = "phone")
     private String phone;
-
-    @ManyToOne
-    @JoinColumn(name = "shop_id", referencedColumnName = "id")
-    private Shop shop;
 }

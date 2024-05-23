@@ -1,8 +1,7 @@
 package com.Saiddev.ShopifyOrderTracking.entity;
 
-import com.Saiddev.ShopifyOrderTracking.entity.shop.Shop;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.Saiddev.ShopifyOrderTracking.entity.shop.ShopPlatform;
+import com.Saiddev.ShopifyOrderTracking.entity.shop.Shopify;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +10,6 @@ import lombok.Setter;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -58,6 +56,6 @@ public class Order {
     private Customer customer;
 
     @ManyToOne
-    @JoinColumn(name = "shop_id", referencedColumnName = "id")
-    private Shop shop;
+    @JoinColumn(name = "shop_platform_id", referencedColumnName = "id")
+    private ShopPlatform shopPlatform;
 }

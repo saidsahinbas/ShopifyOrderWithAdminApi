@@ -1,23 +1,14 @@
 package com.Saiddev.ShopifyOrderTracking.entity.shop;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-@Table(name ="shop")
-@NoArgsConstructor
-@AllArgsConstructor
-public class Shop {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+@DiscriminatorValue("SHOPIFY")
+public class Shopify extends ShopPlatform {
 
     @Column(name = "shop_name")
     private String shopName;

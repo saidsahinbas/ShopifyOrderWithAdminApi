@@ -5,8 +5,12 @@ import com.Saiddev.ShopifyOrderTracking.entity.Address;
 import com.Saiddev.ShopifyOrderTracking.entity.Customer;
 import com.Saiddev.ShopifyOrderTracking.entity.LineItem;
 import com.Saiddev.ShopifyOrderTracking.entity.Order;
-import com.Saiddev.ShopifyOrderTracking.entity.shop.Shop;
-import com.Saiddev.ShopifyOrderTracking.service.shop.ShopService;
+import com.Saiddev.ShopifyOrderTracking.entity.shop.ShopPlatform;
+import com.Saiddev.ShopifyOrderTracking.entity.shop.Shopify;
+import com.Saiddev.ShopifyOrderTracking.entity.shop.Trendyol;
+import com.Saiddev.ShopifyOrderTracking.service.shop.ShopPlatformService;
+import com.Saiddev.ShopifyOrderTracking.service.shop.ShopifyService;
+import com.Saiddev.ShopifyOrderTracking.service.shop.TrendyolService;
 import com.google.gson.Gson;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -24,46 +28,56 @@ public class ShopifyAdminApiResource {
     private final LineItemService lineItemService;
     private final AddressService addressService;
     private final CustomerService customerService;
-    private final ShopService shopService;
-
+    private final ShopifyService shopifyService;
+    private final TrendyolService trendyolService;
+    private final ShopPlatformService shopPlatformService;
 
     public ShopifyAdminApiResource(OrderService orderService,
                                    Gson gson,
                                    LineItemService lineItemService,
                                    AddressService addressService,
                                    CustomerService customerService,
-                                   ShopService shopService) {
+                                   ShopifyService shopifyService,
+                                   TrendyolService trendyolService,
+                                   ShopPlatformService shopPlatformService) {
         this.orderService = orderService;
         this.lineItemService = lineItemService;
         this.addressService = addressService;
         this.customerService = customerService;
         this.gson = gson;
-        this.shopService = shopService;
+        this.shopifyService = shopifyService;
+        this.trendyolService = trendyolService;
+        this.shopPlatformService = shopPlatformService;
     }
 
 
-    @Scheduled(fixedRate = 3000)
+    @Scheduled(fixedRate = 300000)
     public void fetchOrders() throws IOException, InterruptedException {
-        List<Shop> shops = shopService.getAllShopFromDb();
-        for (Shop shop : shops) {
-            String shopName = shop.getShopName();
+        List<ShopPlatform> shopPlatforms = shopPlatformService.getAllShopsFromDb();
+        for (ShopPlatform shopPlatform : shopPlatforms) {
+            if (shopPlatform.getShopPlatformName().equals("trendyol")) {
+                Trendyol trendyol = (Trendyol) shopPlatform;
+                trendyolService.getOrderResponseTrendyol(trendyol.getSupplierId());
+            }
+            if (shopPlatform.getShopPlatformName().equals("shopify")) {
+                Shopify shopify = (Shopify) shopPlatform;
 
-            HttpResponse<String> response = shopService.getOrderResponseFromDifferentShop(shopName);
-            OrderListDto orderListDto = gson.fromJson(response.body(), OrderListDto.class);
+                HttpResponse<String> response = shopifyService.getOrderResponseShopify(shopify.getShopName());
+                OrderListDto orderListDto = gson.fromJson(response.body(), OrderListDto.class);
 
-            for (OrderDto orderDto : orderListDto.getOrderDtos()) {
-                Order order = createOrUpdateOrderFromDto(orderDto);
-                order.setShop(shop);
-                Customer customer = createCustomerFromDto(orderDto.getCustomerDtos());
-                customer.setShop(shop);
-                Address address = createAddressFromDto(orderDto.getCustomerDtos(), customer);
+                for (OrderDto orderDto : orderListDto.getOrderDtos()) {
+                    Order order = createOrUpdateOrderFromDto(orderDto);
+                    order.setShopPlatform(shopPlatform);
+                    Customer customer = createCustomerFromDto(orderDto.getCustomerDtos());
+                    Address address = createAddressFromDto(orderDto.getCustomerDtos(), customer);
 
-                customerService.saveCustomer(customer);
-                addressService.saveAddress(address);
-                order.setCustomer(customer);
-                orderService.saveOrder(order);
+                    customerService.saveCustomer(customer);
+                    addressService.saveAddress(address);
+                    order.setCustomer(customer);
+                    orderService.saveOrder(order);
 
-                processLineItems(orderDto, order);
+                    processLineItems(orderDto, order);
+                }
             }
         }
     }
@@ -90,7 +104,7 @@ public class ShopifyAdminApiResource {
 
     private Customer createCustomerFromDto(CustomerDto customerDto) {
         if (customerDto == null) {
-            return new Customer(1L, 9999L, "bilimeyen@bilinmeyen", new Date(), new Date(), "bilinmeyen", "bilinmeyen", "TRY", shopService.findShopByShopName("mp-integrator-2"));
+            return new Customer(1L, 9999L, "bilimeyen@bilinmeyen", new Date(), new Date(), "bilinmeyen", "bilinmeyen", "TRY");
         } else {
             Customer customer = customerService.findByCustomerIdOnApi(customerDto.getId());
             if (customer == null) {
